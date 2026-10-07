@@ -1,0 +1,323 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * SOEA · Caça QR — sistema visual a partir da identidade Confea-X.
+ *
+ * Fonte das decisões:
+ *  - confeax.org.br: laranja #EB5C29 (ação principal, a cor do X), roxo #65349C
+ *    (ação secundária), Open Sans, superfícies brancas e lavanda #F6F5F9, cinzas zinc,
+ *    botões com raio 10px, cartões 14px, pílulas totalmente arredondadas.
+ *  - Logotipo Confea-X: azul-marinho #282D61 (palavra) + laranja (X).
+ *  - Manual da marca Confea: a marca não é distorcida, recolorida, inclinada nem
+ *    recebe sombra; respeita a área de proteção.
+ *
+ * Contraste (WCAG AA): o laranja oficial (#EB5C29) com texto branco fica em 3,45:1,
+ * então preenchimentos com texto usam o tom "strong" (#CC4314, 4,79:1) e textos em
+ * laranja usam o tom "ink" (#B8461B, 5,34:1). O laranja oficial fica para a marca,
+ * ícones, gráficos e detalhes.
+ */
+:root {
+  /* marca */
+  --brand-orange: #eb5c29;
+  --brand-orange-strong: #cc4314;
+  --brand-orange-ink: #b8461b;
+  --brand-orange-tint: #fdeee8;
+  --brand-purple: #65349c;
+  --brand-purple-tint: #f1ebf8;
+  --brand-navy: #282d61;
+  --brand-navy-deep: #1c2050;
+  --brand-navy-soft: #c9cbe6; /* texto secundário sobre o azul (8:1) */
+
+  /* neutros (zinc, como no site) */
+  --white: #ffffff;
+  --surface: #f6f5f9;
+  --surface-2: #eeecf4;
+  --line: #e4e4e7;
+  --line-strong: #d4d4d8;
+  --ink: #17171c;
+  --ink-soft: #3f3f46;
+  --muted-ink: #52525b;
+  --subtle-ink: #71717a;
+
+  /* estados */
+  --success: #1f7a5c;
+  --success-tint: #e6f4ee;
+  --danger: #b42318;
+  --danger-tint: #fdecea;
+
+  /* tokens shadcn */
+  --background: var(--white);
+  --foreground: var(--ink);
+  --card: var(--white);
+  --card-foreground: var(--ink);
+  --popover: var(--white);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand-orange-strong);
+  --primary-foreground: var(--white);
+  --secondary: var(--brand-purple);
+  --secondary-foreground: var(--white);
+  --muted: var(--surface);
+  --muted-foreground: var(--muted-ink);
+  --accent: var(--surface-2);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--white);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--brand-orange);
+  --chart-1: var(--brand-orange);
+  --chart-2: var(--brand-purple);
+  --chart-3: var(--brand-navy);
+  --chart-4: var(--success);
+  --chart-5: var(--subtle-ink);
+  --radius: 0.625rem; /* 10px, botões do site */
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--brand-orange-strong);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand-orange);
+
+  --nav-h: 72px;
+  --header-h: 60px;
+}
+
+@theme inline {
+  --font-sans: var(--font-open-sans), 'Open Sans', system-ui, sans-serif;
+  --font-display: var(--font-open-sans), 'Open Sans', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 24px;
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-orange: var(--brand-orange);
+  --color-orange-strong: var(--brand-orange-strong);
+  --color-orange-ink: var(--brand-orange-ink);
+  --color-orange-tint: var(--brand-orange-tint);
+  --color-purple: var(--brand-purple);
+  --color-purple-tint: var(--brand-purple-tint);
+  --color-navy: var(--brand-navy);
+  --color-navy-deep: var(--brand-navy-deep);
+  --color-navy-soft: var(--brand-navy-soft);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-subtle: var(--subtle-ink);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    background: var(--white);
+    caret-color: var(--brand-orange);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--brand-orange-tint);
+    color: var(--ink);
+  }
+  button,
+  [role='button'] {
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  input[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+  }
+  input[type='date']:invalid {
+    color: var(--subtle-ink);
+  }
+  a {
+    text-underline-offset: 0.2em;
+  }
+}
+
+/* ────────────────────────── utilitários ────────────────────────── */
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* anel de foco que respeita o arredondamento */
+@utility focus-ring {
+  outline: none;
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--brand-orange);
+  }
+}
+
+/* rótulo de seção do site Confea-X: texto laranja pequeno acima do título */
+@utility kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--brand-orange-ink);
+}
+
+/* sombra fria e baixa, tingida pelo azul da marca (nunca preto puro) */
+@utility shadow-soft {
+  box-shadow: 0 1px 2px rgb(40 45 97 / 0.06), 0 8px 24px -12px rgb(40 45 97 / 0.18);
+}
+@utility shadow-lift {
+  box-shadow: 0 2px 4px rgb(40 45 97 / 0.06), 0 20px 40px -18px rgb(40 45 97 / 0.32);
+}
+
+/* toque físico: afunda 1px e reduz levemente */
+@utility pressable {
+  transition: transform 140ms var(--ease-out-expo), box-shadow 140ms var(--ease-out-expo), background-color 160ms ease;
+  &:active:not(:disabled) {
+    transform: translateY(1px) scale(0.985);
+  }
+}
+
+/* ────────────────────────── movimento ────────────────────────── */
+
+@keyframes soea-node-ping {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.soea-node-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: soea-node-ping 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+@keyframes soea-sheen {
+  from { transform: translateX(-120%) skewX(-18deg); }
+  to { transform: translateX(260%) skewX(-18deg); }
+}
+.soea-sheen {
+  animation: soea-sheen 3.2s cubic-bezier(0.16, 1, 0.3, 1) 1.2s infinite;
+}
+
+@keyframes soea-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+.soea-skeleton {
+  background: linear-gradient(100deg, var(--surface-2) 30%, var(--white) 50%, var(--surface-2) 70%);
+  background-size: 200% 100%;
+  animation: soea-shimmer 1.6s linear infinite;
+}
+
+@keyframes soea-scanline {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(var(--travel, 200px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soea-node-ping,
+  .soea-sheen,
+  .soea-skeleton {
+    animation: none !important;
+  }
+}
+
+/* Toasts: cartões próprios em lib/notify.tsx (sonner em modo unstyled) */
+[data-sonner-toaster] [data-sonner-toast] {
+  width: auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* ────────────────────────── navegador ────────────────────────── */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 3px solid var(--white);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

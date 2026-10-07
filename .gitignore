@@ -1,0 +1,27 @@
+.env
+.vscode
+__pycache__
+
+frontend/.env.local
+frontend/node_modules/
+node_modules
+frontend/.next
+
+# Ambientes e dependências (gerados localmente)
+venv/
+.venv/
+backend/venv/
+*.pyc
+.pytest_cache/
+
+# Segredos: só os .env.example vão para o git
+.env.*
+!.env.example
+frontend/.env.local
+*.env
+
+# Saídas locais
+*.log
+out.txt
+err.txt
+.vercel

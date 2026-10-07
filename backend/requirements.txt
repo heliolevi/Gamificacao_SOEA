@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+supabase
+python-dotenv
+qrcode[pil]
+jinja2
+gunicorn
+openpyxl
+python-multipart
+python-dateutil
+pyjwt
+passlib
+pydantic>=2.6
+email-validator
+httpx
+psycopg[binary]>=3.2
+psycopg-pool>=3.2

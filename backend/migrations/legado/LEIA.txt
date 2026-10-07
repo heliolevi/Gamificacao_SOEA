@@ -1,0 +1,3 @@
+Scripts do banco ANTIGO. NAO RODE.
+O 2026_10_soea_seguranca.sql mexe em permissoes de TODAS as tabelas do projeto e quebraria outros sistemas no mesmo Supabase.
+Use so ../00a_limpar_tentativa_anterior.sql (se precisar) e ../00_banco_novo_completo.sql.
