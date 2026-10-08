@@ -1,6 +1,7 @@
 """Relatório para o Power BI (/bi/*). Não precisa de Postgres: o banco é substituído por um falso."""
 import sys
 import types
+from collections import Counter
 
 import pytest
 from fastapi import FastAPI
@@ -40,6 +41,20 @@ def test_participantes_com_vinculo_contagens_e_nivel():
 def test_conta_antiga_sem_vinculo_vira_nao_informado():
     p = {r["id_participante"]: r for r in montar_participantes(USUARIOS, contar_por_usuario(CATCH), contar_por_usuario(RESPOSTAS))}
     assert p["u3"]["vinculo"] == "nao_informado" and p["u3"]["vinculo_rotulo"] == "Não informado"
+
+
+def test_contagem_exata_por_vinculo():
+    """Cada participante aparece uma vez; somar por vínculo dá o total e nada se perde."""
+    muitos = (
+        [{"id_user": f"c{i}", "nome": "x", "vinculo": "comunidade", "pontos": 0, "data_registro": None} for i in range(5)]
+        + [{"id_user": f"e{i}", "nome": "x", "vinculo": "empresa", "pontos": 0, "data_registro": None} for i in range(3)]
+        + [{"id_user": "s0", "nome": "x", "vinculo": "startup_do_sistema", "pontos": 0, "data_registro": None}]
+        + [{"id_user": f"a{i}", "nome": "x", "vinculo": None, "pontos": 0, "data_registro": None} for i in range(2)]
+    )
+    linhas = montar_participantes(muitos, contar_por_usuario([]), contar_por_usuario([]))
+    por_vinculo = Counter(l["vinculo"] for l in linhas)
+    assert por_vinculo == {"comunidade": 5, "empresa": 3, "startup_do_sistema": 1, "nao_informado": 2}
+    assert sum(por_vinculo.values()) == len(muitos) == len({l["id_participante"] for l in linhas})
 
 
 def test_vinculo_desconhecido_nao_quebra():

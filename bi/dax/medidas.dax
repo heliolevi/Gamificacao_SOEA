@@ -2,7 +2,7 @@
 // e cole cada medida (Modelagem > Nova medida). Formatos sugeridos entre colchetes.
 
 // ───────── Participantes ─────────
-Total Participantes = DISTINCTCOUNT ( Participantes[id_participante] )                       // [inteiro]
+Total Participantes = DISTINCTCOUNT ( Participantes[id_participante] ) + 0              // [inteiro] o "+ 0" faz vínculos sem ninguém aparecerem como 0 (e não sumirem)
 
 % de Participantes =                                                                       // [porcentagem]
 DIVIDE ( [Total Participantes], CALCULATE ( [Total Participantes], ALL ( Vinculos ) ) )

@@ -54,12 +54,30 @@ Contas criadas antes do campo "vínculo" aparecem como **Não informado**. Admin
 6. **Medidas:** crie uma tabela vazia `Medidas` e cole cada medida de `dax/medidas.dax`.
 7. **Tema:** Exibição → Temas → Procurar temas → `tema-soea.json`.
 
+## 2.1 Conferir a contagem contra o banco
+
+Cada participante entra **uma vez** (por `id_participante`), então a quantidade por vínculo no relatório é exata.
+Para tirar a prova, rode no SQL Editor do Neon e compare com a tabela "Quantidade por vínculo":
+
+```sql
+select coalesce(vinculo, 'nao_informado') as vinculo, count(*) as participantes
+from users
+where not is_admin
+group by 1
+order by 1;
+```
+
+O que entra na conta: contas **com cadastro concluído** (código do e-mail confirmado), sem administradores.
+Quem digitou o cadastro mas ainda não confirmou o código não conta. Contas criadas **antes** do campo existir
+ficam em **Não informado** até o participante escolher um vínculo.
+
 ## 3. Páginas do relatório
 
 **Página 1 · Visão geral**
 | Visual | Campos |
 |---|---|
 | Cartões (4) | `Total Participantes`, `Taxa de Engajamento`, `QRs Lidos`, `Pontos Médios` |
+| **Tabela "Quantidade por vínculo"** | linhas `Vinculos[vinculo_rotulo]`; valores `Total Participantes` (número exato) e `% de Participantes`; ative **Totais** (a soma deve bater com o cartão) |
 | Barras horizontais | eixo `Vinculos[vinculo_rotulo]`, valor `Total Participantes` (rótulos com `% de Participantes`) |
 | Rosca | legenda `Vinculos[vinculo_rotulo]`, valor `Total Participantes` |
 | Colunas | eixo `Participantes[data_cadastro]`, valor `Total Participantes` (cadastros por dia) |
