@@ -17,6 +17,7 @@ import config
 from database import banco_dados
 from auth import get_current_user, require_admin
 from auth_routes import router as auth_router, RegistroIn, CodigoEnviadoOut, registro_iniciar
+from bi import router as bi_router
 from cache import cache_get, cache_set, valores_enum, RANKING_CACHE_TTL
 from nivel import calcular_nivel
 from vinculos import rotulo_vinculo
@@ -49,6 +50,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(bi_router)
 
 
 @app.middleware("http")

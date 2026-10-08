@@ -47,6 +47,10 @@ EMAIL_FROM = os.getenv("EMAIL_FROM", "SOEA <nao-responda@example.com>")
 # ---- anti-bot (opcional) ----
 TURNSTILE_SECRET = os.getenv("TURNSTILE_SECRET", "")
 
+# ---- relatórios (Power BI) ----
+# Chave só de LEITURA para /bi/*. Sem ela (vazia) as rotas ficam desligadas (404).
+BI_API_KEY = os.getenv("BI_API_KEY", "").strip()
+
 # ---- app ----
 PUBLIC_APP_URL = os.getenv("PUBLIC_APP_URL", "https://qr-code-hunt.vercel.app").rstrip("/")
 EVENTO_NOME = "SOEA"
@@ -58,6 +62,8 @@ def _validar() -> None:
         erros.append("JWT_SECRET ausente ou curto (mínimo 32 caracteres aleatórios).")
     if len(OTP_PEPPER) < 32:
         erros.append("OTP_PEPPER ausente ou curto (mínimo 32 caracteres aleatórios).")
+    if BI_API_KEY and len(BI_API_KEY) < 32:
+        erros.append("BI_API_KEY curta (mínimo 32 caracteres aleatórios) — ou deixe vazia para desligar o /bi.")
     if EM_PRODUCAO and not (RESEND_API_KEY or BREVO_API_KEY):
         erros.append("BREVO_API_KEY (ou RESEND_API_KEY) é obrigatório em produção.")
     if EM_PRODUCAO and "example.com" in EMAIL_FROM:
