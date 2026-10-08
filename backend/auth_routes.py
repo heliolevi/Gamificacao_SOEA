@@ -24,7 +24,7 @@ Sessão
 """
 import time
 import uuid
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -35,6 +35,7 @@ import email_provider
 from auth import carregar_usuario, get_current_user_row
 from database import banco_dados
 from nivel import calcular_nivel
+from vinculos import VINCULOS
 from security import (
     criar_access_token,
     criar_desafio,
@@ -79,7 +80,7 @@ class RegistroIn(_Entrada):
     nome: str = Field(min_length=6, max_length=120)
     email: EmailStr = Field(max_length=254)
     senha: str = Field(min_length=8, max_length=128)
-    data_nasc: date
+    vinculo: str = Field(max_length=40)
     telefone: str = Field(default="", max_length=20)
     turnstile_token: str | None = Field(default=None, max_length=2048)
 
@@ -102,15 +103,11 @@ class RegistroIn(_Entrada):
     def _senha(cls, v: str) -> str:
         return _validar_senha_nova(v)
 
-    @field_validator("data_nasc")
+    @field_validator("vinculo")
     @classmethod
-    def _data_nasc(cls, v: date) -> date:
-        hoje = date.today()
-        if v.year < 1900 or v > hoje:
-            raise ValueError("Data de nascimento inválida.")
-        idade = hoje.year - v.year - ((hoje.month, hoje.day) < (v.month, v.day))
-        if idade < 15:
-            raise ValueError("Você precisa ter pelo menos 15 anos.")
+    def _vinculo(cls, v: str) -> str:
+        if v not in VINCULOS:
+            raise ValueError("Escolha como você se relaciona com o SOEA.")
         return v
 
     @field_validator("telefone")
@@ -384,7 +381,7 @@ def registro_iniciar(dados: RegistroIn, request: Request):
                 "attempt_id": str(uuid.uuid4()),
                 "payload": {
                     "nome": dados.nome,
-                    "data_nasc": dados.data_nasc.isoformat(),
+                    "vinculo": dados.vinculo,
                     "senha_hash": hash_senha(dados.senha),
                     "telefone": dados.telefone or None,
                 },

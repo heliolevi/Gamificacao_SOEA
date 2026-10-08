@@ -64,7 +64,8 @@ Antes de começar, você vai precisar ter instalado em sua máquina o [Git](http
    * `BREVO_API_KEY` (ou `RESEND_API_KEY`) e `EMAIL_FROM` (remetente verificado na Brevo, ou domínio verificado no Resend). Sem a chave, em desenvolvimento o código aparece no terminal do uvicorn.
    * Em `http://localhost`, use `COOKIE_SECURE=false`.
 
-   Rode a migração `backend/migrations/2026_10_soea_seguranca.sql` no SQL Editor do Supabase (ela liga o RLS em todas as tabelas).
+   Banco novo: rode `backend/migrations/00_banco_novo_completo.sql` no SQL Editor (já inclui o vínculo do cadastro).
+   Banco que já existe: rode `backend/migrations/01_vinculo_no_cadastro.sql` (cria `users.vinculo`; é segura de repetir e não apaga nada).
 
    Inicie o servidor:
    ```bash
