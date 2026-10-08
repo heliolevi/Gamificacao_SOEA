@@ -17,8 +17,10 @@ import config
 from database import banco_dados
 from auth import get_current_user, require_admin
 from auth_routes import router as auth_router, RegistroIn, CodigoEnviadoOut, registro_iniciar
+from bi import router as bi_router
 from cache import cache_get, cache_set, valores_enum, RANKING_CACHE_TTL
 from nivel import calcular_nivel
+from vinculos import rotulo_vinculo
 
 # uvicorn main:app --reload
 
@@ -48,6 +50,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(bi_router)
 
 
 @app.middleware("http")
@@ -108,7 +111,7 @@ def exportar_dados(
 ):
     query = (
         banco_dados.table("users")
-        .select("nome", "pontos", "escola", 'curso_interesse', "status_academico")
+        .select("nome", "pontos", "escola", 'curso_interesse', "status_academico", "vinculo")
         .gte("data_registro", f"{data}T00:00:00")
         .lte("data_registro", f"{data}T23:59:59")
         .eq("is_admin", False)
@@ -139,8 +142,8 @@ def exportar_dados(
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = f"Relatório {data}"
-        colunas = ["Nome", "Pontos",  "Escola"]
-        campos  = ["nome", "pontos", "escola"]
+        colunas = ["Nome", "Pontos", "Vínculo"]
+        campos  = ["nome", "pontos", "vinculo"]
         header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
         for col_idx, titulo in enumerate(colunas, start=1):
@@ -150,7 +153,10 @@ def exportar_dados(
             cell.alignment = Alignment(horizontal="center")
         for row_idx, usuario in enumerate(usuarios, start=2):
             for col_idx, campo in enumerate(campos, start=1):
-                ws.cell(row=row_idx, column=col_idx, value=usuario.get(campo, ""))
+                valor = usuario.get(campo, "")
+                if campo == "vinculo":
+                    valor = rotulo_vinculo(valor)
+                ws.cell(row=row_idx, column=col_idx, value=valor)
         for col in ws.columns:
             max_length = max((len(str(c.value)) for c in col if c.value), default=10)
             ws.column_dimensions[col[0].column_letter].width = max_length + 4

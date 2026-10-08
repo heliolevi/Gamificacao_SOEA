@@ -1,0 +1,47 @@
+// Medidas do relatório SOEA. Crie uma tabela de medidas (Inserir dados > tabela vazia "Medidas")
+// e cole cada medida (Modelagem > Nova medida). Formatos sugeridos entre colchetes.
+
+// ───────── Participantes ─────────
+Total Participantes = DISTINCTCOUNT ( Participantes[id_participante] ) + 0              // [inteiro] o "+ 0" faz vínculos sem ninguém aparecerem como 0 (e não sumirem)
+
+% de Participantes =                                                                       // [porcentagem]
+DIVIDE ( [Total Participantes], CALCULATE ( [Total Participantes], ALL ( Vinculos ) ) )
+
+Participantes Engajados =                                                               // [inteiro] leu ao menos 1 QR
+CALCULATE ( [Total Participantes], Participantes[qrs_capturados] > 0 )
+
+Taxa de Engajamento = DIVIDE ( [Participantes Engajados], [Total Participantes] )              // [porcentagem]
+
+Último Cadastro = MAX ( Participantes[registrado_em] )                                  // [data/hora]
+
+// ───────── Pontuação e nível ─────────
+Pontos Totais = SUM ( Participantes[pontos] )                                           // [inteiro, separador de milhar]
+
+Pontos Médios = DIVIDE ( [Pontos Totais], [Total Participantes] )                             // [decimal, 1 casa]
+
+Nível Médio = AVERAGE ( Participantes[nivel] )                                          // [decimal, 1 casa]
+
+// ───────── Engajamento ─────────
+QRs Lidos = SUM ( Participantes[qrs_capturados] )                                       // [inteiro]
+
+QRs por Participante = DIVIDE ( [QRs Lidos], [Total Participantes] )                          // [decimal, 1 casa]
+
+Perguntas Respondidas = SUM ( Participantes[perguntas_respondidas] )                    // [inteiro]
+
+Total Capturas = COUNTROWS ( Capturas )                                                       // [inteiro] igual a QRs Lidos, mas filtra por local/dia/hora
+
+// ───────── Destaques (para cartões) ─────────
+Vínculo Líder =                                                                         // vínculo com mais participantes
+VAR Tabela =
+    ADDCOLUMNS ( VALUES ( Vinculos[vinculo_rotulo] ), "@n", [Total Participantes] )
+RETURN
+    MAXX ( TOPN ( 1, Tabela, [@n], DESC ), Vinculos[vinculo_rotulo] )
+
+Vínculo Mais Engajado =                                                                 // maior média de QRs por participante
+VAR Tabela =
+    FILTER (
+        ADDCOLUMNS ( VALUES ( Vinculos[vinculo_rotulo] ), "@q", [QRs por Participante] ),
+        [@q] > 0
+    )
+RETURN
+    MAXX ( TOPN ( 1, Tabela, [@q], DESC ), Vinculos[vinculo_rotulo] )

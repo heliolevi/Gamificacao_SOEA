@@ -7,7 +7,7 @@ import { AlertCircle, ArrowLeft, ArrowRight, ChevronDown, Eye, EyeOff, MailCheck
 import { authPost, mensagemDeErro, salvarSessao, type Sessao } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { gsap, useGSAP, prefersReducedMotion, haptic } from "@/lib/gsap"
-import { EVENT } from "@/lib/event"
+import { EVENT, VINCULOS } from "@/lib/event"
 import { SoeaLockup, SoeaMark } from "@/components/soea/mark"
 import { HeroLogo } from "@/components/soea/hero-logo"
 import { TextForm } from "@/components/soea/text-form"
@@ -56,7 +56,7 @@ export function AuthForm({ onSuccess, logoIntro = true }: AuthFormProps) {
     name: "",
     email: "",
     senha: "",
-    data_nasc: "",
+    vinculo: "",
     telefone: "",
     codigo: "",
   })
@@ -169,7 +169,7 @@ export function AuthForm({ onSuccess, logoIntro = true }: AuthFormProps) {
           nome: formData.name,
           email,
           senha: formData.senha,
-          data_nasc: formData.data_nasc,
+          vinculo: formData.vinculo,
           telefone: formData.telefone.replace(/\D/g, ""),
           ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
         })
@@ -464,31 +464,37 @@ export function AuthForm({ onSuccess, logoIntro = true }: AuthFormProps) {
 
             {etapa === "cadastro" && (
               <>
-                <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2">
-                  <Field label="Data de nascimento" htmlFor="data_nasc">
-                    <input
-                      id="data_nasc"
-                      type="date"
-                      value={formData.data_nasc}
-                      onChange={(e) => set("data_nasc", e.target.value)}
-                      className={inputCls}
-                      required
-                    />
-                  </Field>
-                  <Field label="Telefone" hint="opcional" htmlFor="telefone">
-                    <input
-                      id="telefone"
-                      type="tel"
-                      inputMode="numeric"
-                      autoComplete="tel-national"
-                      placeholder="(98) 9 0000-0000"
-                      value={formData.telefone}
-                      onChange={handlePhoneChange}
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
-
+                <Field label="Seu vínculo com o SOEA" htmlFor="vinculo">
+                  <select
+                    id="vinculo"
+                    value={formData.vinculo}
+                    onChange={(e) => set("vinculo", e.target.value)}
+                    className={cn(inputCls, "appearance-none pr-11", !formData.vinculo && "text-subtle")}
+                    required
+                  >
+                    <option value="" disabled>
+                      Selecione uma opção
+                    </option>
+                    {VINCULOS.map((v) => (
+                      <option key={v.valor} value={v.valor}>
+                        {v.rotulo}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown aria-hidden className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-subtle" />
+                </Field>
+                <Field label="Telefone" hint="opcional" htmlFor="telefone">
+                  <input
+                    id="telefone"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    placeholder="(98) 9 0000-0000"
+                    value={formData.telefone}
+                    onChange={handlePhoneChange}
+                    className={inputCls}
+                  />
+                </Field>
               </>
             )}
 

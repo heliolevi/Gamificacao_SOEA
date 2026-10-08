@@ -1,0 +1,28 @@
+{
+  "name": "SOEA",
+  "dataColors": ["#282D61", "#EB5C29", "#65349C", "#1F7A5C", "#8E92C8", "#F2A27F", "#B8A3D6", "#71717A"],
+  "background": "#FFFFFF",
+  "foreground": "#17171C",
+  "tableAccent": "#282D61",
+  "good": "#1F7A5C",
+  "bad": "#B42318",
+  "neutral": "#EB5C29",
+  "maximum": "#282D61",
+  "center": "#F6F5F9",
+  "minimum": "#C9CBE6",
+  "textClasses": {
+    "label": { "fontFace": "Segoe UI", "fontSize": 11, "color": "#3F3F46" },
+    "title": { "fontFace": "Segoe UI Semibold", "fontSize": 13, "color": "#17171C" },
+    "callout": { "fontFace": "Segoe UI Semibold", "fontSize": 28, "color": "#282D61" },
+    "header": { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#282D61" }
+  },
+  "visualStyles": {
+    "page": { "*": { "background": [{ "color": { "solid": { "color": "#F6F5F9" } }, "transparency": 0 }] } },
+    "*": {
+      "*": {
+        "border": [{ "show": true, "color": { "solid": { "color": "#E4E4E7" } }, "radius": 8 }],
+        "visualHeader": [{ "show": false }]
+      }
+    }
+  }
+}

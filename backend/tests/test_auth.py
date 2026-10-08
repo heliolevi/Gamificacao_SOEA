@@ -8,7 +8,7 @@ CADASTRO = {
     "nome": "Maria Engenheira",
     "email": "Maria@Exemplo.com",
     "senha": "senha-forte-123",
-    "data_nasc": "2000-05-10",
+    "vinculo": "comunidade",
     "telefone": "(98) 98888-7777",
 }
 
@@ -56,8 +56,9 @@ def test_campo_extra_no_payload_e_recusado(client):
 
 def test_validacoes_do_payload(client):
     for ruim in (
-        {"data_nasc": "2020-01-01"},
-        {"data_nasc": "nao-e-data"},
+        {"vinculo": "outro"},
+        {"vinculo": ""},
+        {"data_nasc": "2000-05-10"},  # campo removido: extra="forbid" recusa
         {"nome": "Ana 123 Silva"},
         {"email": "sem-arroba"},
         {"senha": "curta"},
@@ -76,8 +77,8 @@ def test_fluxo_completo_cria_conta_verificada_sem_vazar_hash(client, conn, email
     assert corpo["user"]["email"] == "maria@exemplo.com"
     assert corpo["user"]["nome"] == "Maria Engenheira"
     assert "soea_rt" in r.cookies
-    ok = conn.execute("select email_verified_at is not null, telefone from users").fetchone()
-    assert ok == (True, "98988887777")
+    ok = conn.execute("select email_verified_at is not null, telefone, vinculo from users").fetchone()
+    assert ok == (True, "98988887777", "comunidade")
     assert conn.execute("select count(*) from pending_registrations").fetchone()[0] == 0
     me = client.get("/auth/me", headers=_bearer(corpo["token"]))
     assert me.status_code == 200 and me.json()["nivel"] == 1

@@ -19,7 +19,10 @@ create extension if not exists pgcrypto;
 create table public.users (
   id_user            uuid primary key default gen_random_uuid(),
   nome               text not null,
-  data_nasc          date,
+  data_nasc          date,             -- legado: não é mais pedido no cadastro
+  vinculo            text check (vinculo is null or vinculo in (
+                       'comunidade', 'empresa', 'empresa_do_sistema', 'entidade',
+                       'instituicao_ensino_superior', 'startup_do_sistema')),
   email              text not null,
   senha_hash         text,
   telefone           text,
@@ -246,9 +249,9 @@ begin
   end if;
 
   -- jsonb_populate_record converte o texto do payload para date etc.
-  insert into users (nome, data_nasc, email, senha_hash, telefone,
+  insert into users (nome, vinculo, email, senha_hash, telefone,
                      pontos, data_registro, email_verified_at, token_version)
-  select nome, data_nasc, email, senha_hash, telefone,
+  select nome, vinculo, email, senha_hash, telefone,
          0, now(), now(), 0
   from jsonb_populate_record(null::users, r.payload || jsonb_build_object('email', p_email))
   returning id_user into novo_id;
