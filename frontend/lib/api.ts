@@ -128,12 +128,16 @@ function expulsar() {
   if (typeof window !== "undefined") window.location.href = "/"
 }
 
+// Rotas de /auth que NÃO usam o access token (login, cadastro, senha, refresh). As demais,
+// como /auth/me, são protegidas: precisam do Bearer e da renovação automática da sessão.
+const ROTAS_PUBLICAS_DE_AUTH = /^\/auth\/(login|registro|senha|refresh)(\/|\?|$)/
+
 /**
  * fetch autenticado: injeta o Bearer, renova a sessão quando o access token expira
  * e repete a chamada uma vez. Se não der para renovar, derruba a sessão local.
  */
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
-  const rotaDeAuth = path.startsWith("/auth/")
+  const rotaDeAuth = ROTAS_PUBLICAS_DE_AUTH.test(path)
   const logado = !!getStoredUser()
 
   if (!accessToken && logado && !rotaDeAuth) {
