@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { HexagonLogo } from "@/components/hexagon-logo"
 import { useRouter } from "next/navigation"
 import { apiFetch, getStoredUser, sair, baixarArquivoAutenticado, API_BASE } from "@/lib/api"
+import { EVENT } from "@/lib/event"
 
 interface QRCode {
   code_hash: string
@@ -440,7 +441,7 @@ export default function AdminQRManager() {
       <header className="max-w-5xl mx-auto flex justify-between items-center mb-8 border-b border-border pb-4">
         <div className="flex items-center gap-3">
           <HexagonLogo size="sm" />
-          <h1 className="text-xl font-bold uppercase tracking-wider">Painel Admin <span className="text-primary">It Works</span></h1>
+          <h1 className="text-xl font-bold uppercase tracking-wider">Painel Admin <span className="text-primary">{EVENT.name}</span></h1>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" onClick={() => setIsExporting(true)}>
