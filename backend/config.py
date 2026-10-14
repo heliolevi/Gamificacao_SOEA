@@ -28,6 +28,8 @@ CHALLENGE_TTL = 10 * 60                                                  # desaf
 # ---- códigos por e-mail ----
 OTP_PEPPER = os.getenv("OTP_PEPPER", "")
 OTP_TTL = 10 * 60
+# Cadastro: e-mails para Gmail chegam a levar ~10 min; o código precisa continuar válido quando chegar.
+OTP_TTL_CADASTRO = 30 * 60
 OTP_MAX_TENTATIVAS = 5
 OTP_REENVIO_SEGUNDOS = 60
 OTP_ENVIOS_POR_HORA = 6

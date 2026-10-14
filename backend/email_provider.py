@@ -134,7 +134,7 @@ _TITULOS = {
 
 
 def enviar_codigo(para: str, codigo: str, proposito: str) -> None:
-    minutos = config.OTP_TTL // 60
+    minutos = (config.OTP_TTL_CADASTRO if proposito == "cadastro" else config.OTP_TTL) // 60
     titulo = _TITULOS[proposito]
     assunto = f"{config.EVENTO_NOME} · {_ASSUNTOS[proposito]}"
     html = _layout(

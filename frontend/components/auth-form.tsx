@@ -399,6 +399,11 @@ export function AuthForm({ onSuccess, logoIntro = true }: AuthFormProps) {
                     {reenviarEm > 0 ? `Reenviar em ${reenviarEm}s` : "Reenviar código"}
                   </button>
                 </div>
+                {etapa === "codigo-cadastro" && (
+                  <p className="text-[13px] leading-snug text-muted-foreground">
+                    O e-mail pode levar alguns minutos para chegar. Se pedir outro código, o primeiro continua valendo: use o que chegar primeiro.
+                  </p>
+                )}
               </div>
             )}
 

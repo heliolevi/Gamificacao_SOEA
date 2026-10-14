@@ -40,6 +40,13 @@ def gerar_otp() -> str:
     return f"{secrets.randbelow(10**6):06d}"
 
 
+def codigo_estavel(contexto: str) -> str:
+    """Código de 6 dígitos DERIVADO do contexto (HMAC com o pepper): o mesmo contexto dá sempre o mesmo código.
+    No cadastro, o reenvio manda o MESMO código, então um e-mail que chega atrasado continua valendo."""
+    h = hmac.new(config.OTP_PEPPER.encode(), f"codigo-estavel:{contexto}".encode(), hashlib.sha256).digest()
+    return f"{int.from_bytes(h, 'big') % 10**6:06d}"
+
+
 def hash_otp(codigo: str, contexto: str) -> str:
     """HMAC do código amarrado ao contexto (e-mail/propósito). O código nunca vai para o banco."""
     mensagem = f"{contexto}:{codigo}".encode()
