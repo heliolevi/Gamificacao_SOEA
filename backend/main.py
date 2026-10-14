@@ -16,7 +16,7 @@ from datetime import datetime, date
 import config
 from database import banco_dados
 from auth import get_current_user, require_admin
-from auth_routes import router as auth_router, RegistroIn, CodigoEnviadoOut, registro_iniciar
+from auth_routes import router as auth_router, RegistroIn, CodigoEnviadoOut, iniciar_verificacao_cadastro
 from bi import router as bi_router
 from cache import cache_get, cache_set, valores_enum, RANKING_CACHE_TTL
 from nivel import calcular_nivel
@@ -99,7 +99,7 @@ def cadastro_user(dados: RegistroIn, request: Request):
     Mantida só por compatibilidade. NÃO cria conta: faz o mesmo que /auth/registro/iniciar
     (envia o código por e-mail). A conta só nasce em /auth/registro/verificar.
     """
-    return registro_iniciar(dados, request)
+    return iniciar_verificacao_cadastro(dados, request)
 
 @app.get("/usuarios/dados/exportar")
 def exportar_dados(

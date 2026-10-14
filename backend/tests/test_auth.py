@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from passlib.hash import pbkdf2_sha256
 
 CSRF = {"x-soea-csrf": "1"}
@@ -313,3 +315,49 @@ def test_rls_bloqueia_anon(conn):
                 raise AssertionError(f"anon conseguiu ler {tabela}")
             except Exception as e:
                 assert "permission denied" in str(e)
+
+
+# ---------- cadastro sem verificação de e-mail (EXIGIR_EMAIL_VERIFICADO desligado) ----------
+
+@pytest.fixture()
+def sem_verificacao(monkeypatch):
+    import config
+
+    monkeypatch.setattr(config, "EXIGIR_EMAIL_VERIFICADO", False)
+
+
+def test_cadastro_direto_cria_conta_e_ja_entra(client, conn, emails, sem_verificacao):
+    r = client.post("/auth/registro/iniciar", json=CADASTRO)
+    assert r.status_code == 201, r.text
+    corpo = r.json()
+    assert corpo["etapa"] == "ok" and corpo["user"]["email"] == "maria@exemplo.com"
+    assert "senha_hash" not in r.text and "soea_rt" in r.cookies
+    nome, vinculo, verificado = conn.execute("select nome, vinculo, email_verified_at from users").fetchone()
+    assert (nome, vinculo, verificado) == ("Maria Engenheira", "comunidade", None)  # e-mail NÃO verificado, de propósito
+    assert conn.execute("select count(*) from pending_registrations").fetchone()[0] == 0
+    assert client.get("/auth/me", headers=_bearer(corpo["token"])).status_code == 200
+
+
+def test_cadastro_direto_nao_manda_codigo_nem_deixa_pendencia(client, conn, emails, sem_verificacao):
+    client.post("/auth/registro/iniciar", json=CADASTRO)
+    assert emails.ultimo_codigo("maria@exemplo.com") is None
+
+
+def test_cadastro_direto_email_repetido_da_409(client, conn, emails, sem_verificacao):
+    assert client.post("/auth/registro/iniciar", json=CADASTRO).status_code == 201
+    r = client.post("/auth/registro/iniciar", json={**CADASTRO, "email": "MARIA@exemplo.com"})
+    assert r.status_code == 409
+    assert conn.execute("select count(*) from users").fetchone()[0] == 1
+
+
+def test_conta_sem_verificacao_faz_login_normal(client, conn, emails, sem_verificacao):
+    client.post("/auth/registro/iniciar", json=CADASTRO)
+    r = client.post("/auth/login", json={"email": "maria@exemplo.com", "senha": CADASTRO["senha"]})
+    assert r.status_code == 200 and r.json()["etapa"] == "ok"
+
+
+def test_admin_continua_com_segunda_etapa_sem_verificacao(client, conn, emails, sem_verificacao):
+    _user_direto(conn, "chefe@exemplo.com", senha="senha-forte-123", admin=True)
+    r = client.post("/auth/login", json={"email": "chefe@exemplo.com", "senha": "senha-forte-123"})
+    assert r.status_code == 200 and r.json()["etapa"] == "codigo" and r.json()["motivo"] == "admin_2fa"
+
