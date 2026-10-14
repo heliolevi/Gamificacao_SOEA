@@ -297,7 +297,7 @@ def _abrir_sessao(request: Request, response: Response, id_user: str) -> SessaoO
     usuario = carregar_usuario(id_user)
     if not usuario:
         raise HTTPException(status_code=401, detail="Conta não encontrada.")
-    if not usuario.get("email_verified_at"):
+    if config.EXIGIR_EMAIL_VERIFICADO and not usuario.get("email_verified_at"):
         raise HTTPException(status_code=403, detail="Confirme seu e-mail para continuar.")
 
     refresh, refresh_hash = gerar_refresh_token()
@@ -361,8 +361,45 @@ MSG_GENERICA_CADASTRO = (
 # ==================== CADASTRO ====================
 
 
-@router.post("/registro/iniciar", response_model=CodigoEnviadoOut, status_code=202)
-def registro_iniciar(dados: RegistroIn, request: Request):
+@router.post("/registro/iniciar", response_model=SessaoOut | CodigoEnviadoOut, status_code=202)
+def registro_iniciar(dados: RegistroIn, request: Request, response: Response):
+    """Com EXIGIR_EMAIL_VERIFICADO desligado cria a conta na hora (201 + sessão); ligado, envia o código (202)."""
+    if config.EXIGIR_EMAIL_VERIFICADO:
+        return iniciar_verificacao_cadastro(dados, request)
+    return criar_conta_direta(dados, request, response)
+
+
+def criar_conta_direta(dados: RegistroIn, request: Request, response: Response) -> SessaoOut:
+    """Cadastro sem código por e-mail. O e-mail NÃO é verificado: email_verified_at fica nulo, de propósito."""
+    ip = ip_cliente(request)
+    # Sem a etapa do e-mail o cadastro é rápido: o teto por IP é maior (muita gente no mesmo Wi-Fi do evento).
+    limitar(f"reg:ip:{ip}", 600, 60)
+    _verificar_turnstile(dados.turnstile_token, ip)
+
+    if _buscar_por_email(dados.email, "id_user"):
+        raise HTTPException(status_code=409, detail="Este e-mail já tem conta. Faça login.")
+    try:
+        novo = banco_dados.table("users").insert(
+            {
+                "nome": dados.nome,
+                "email": dados.email,
+                "senha_hash": hash_senha(dados.senha),
+                "telefone": dados.telefone or None,
+                "vinculo": dados.vinculo,
+                "pontos": 0,
+                "token_version": 0,
+            }
+        ).execute()
+    except Exception:
+        # Corrida: dois cadastros do mesmo e-mail ao mesmo tempo (índice único em lower(email)).
+        if _buscar_por_email(dados.email, "id_user"):
+            raise HTTPException(status_code=409, detail="Este e-mail já tem conta. Faça login.")
+        raise
+    response.status_code = 201
+    return _abrir_sessao(request, response, novo.data[0]["id_user"])
+
+
+def iniciar_verificacao_cadastro(dados: RegistroIn, request: Request) -> CodigoEnviadoOut:
     inicio = time.monotonic()
     ip = ip_cliente(request)
     limitar(f"reg:ip:{ip}", 600, 10)
@@ -485,7 +522,7 @@ def login(dados: LoginIn, request: Request, response: Response):
     if not verificar_senha(dados.senha, (usuario or {}).get("senha_hash")):
         raise HTTPException(status_code=401, detail=MSG_LOGIN_INVALIDO)
 
-    if not usuario.get("email_verified_at"):
+    if config.EXIGIR_EMAIL_VERIFICADO and not usuario.get("email_verified_at"):
         proposito, motivo = "verify_email", "verificar_email"
     elif usuario.get("is_admin"):
         proposito, motivo = "login_2fa", "admin_2fa"
@@ -625,7 +662,7 @@ def refresh(request: Request, response: Response):
         )
 
     usuario = carregar_usuario(resultado["id_user"])
-    if not usuario or not usuario.get("email_verified_at"):
+    if not usuario or (config.EXIGIR_EMAIL_VERIFICADO and not usuario.get("email_verified_at")):
         _limpar_cookie(response)
         raise HTTPException(
             status_code=401,

@@ -173,6 +173,9 @@ export function AuthForm({ onSuccess, logoIntro = true }: AuthFormProps) {
           telefone: formData.telefone.replace(/\D/g, ""),
           ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
         })
+        // Cadastro sem verificação de e-mail: a conta já nasce e a sessão vem na resposta.
+        if (data.etapa === "ok") return entrar(data, true)
+        // Com a verificação ligada no servidor (EXIGIR_EMAIL_VERIFICADO), segue para o código do e-mail.
         setReenviarEm(data.reenviar_em ?? 60)
         notify.info("Código enviado", `Confira a caixa de entrada de ${email}.`)
         irPara("codigo-cadastro")

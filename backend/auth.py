@@ -1,6 +1,7 @@
 """Dependências de autenticação usadas pelas rotas privadas."""
 from fastapi import Depends, Header, HTTPException
 
+import config
 from database import banco_dados
 from security import decodificar_token
 
@@ -31,7 +32,7 @@ async def get_current_user_row(authorization: str = Header(None)) -> dict:
         raise HTTPException(status_code=401, detail="Sessão inválida. Faça login novamente.")
     if int(usuario.get("token_version") or 0) != int(payload.get("tv", -1)):
         raise HTTPException(status_code=401, detail="Sessão encerrada. Faça login novamente.")
-    if not usuario.get("email_verified_at"):
+    if config.EXIGIR_EMAIL_VERIFICADO and not usuario.get("email_verified_at"):
         raise HTTPException(status_code=403, detail="Confirme seu e-mail para continuar.")
     return usuario
 

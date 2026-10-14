@@ -28,6 +28,10 @@ CHALLENGE_TTL = 10 * 60                                                  # desaf
 # ---- códigos por e-mail ----
 OTP_PEPPER = os.getenv("OTP_PEPPER", "")
 OTP_TTL = 10 * 60
+# Cadastro sem código por e-mail (decisão do cliente): False = a conta nasce na hora, sem verificar o e-mail.
+# True = volta ao fluxo com código de 6 dígitos (e contas sem e-mail verificado ficam bloqueadas até confirmar).
+# O 2FA por e-mail do administrador e a recuperação de senha NÃO dependem desta chave: continuam iguais.
+EXIGIR_EMAIL_VERIFICADO = _bool("EXIGIR_EMAIL_VERIFICADO", False)
 OTP_MAX_TENTATIVAS = 5
 OTP_REENVIO_SEGUNDOS = 60
 OTP_ENVIOS_POR_HORA = 6

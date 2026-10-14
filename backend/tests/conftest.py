@@ -32,6 +32,7 @@ os.environ.update(
         "RESEND_API_KEY": "",
         "BREVO_API_KEY": "",
         "TURNSTILE_SECRET": "",
+        "EXIGIR_EMAIL_VERIFICADO": "true",  # a suíte principal testa o fluxo com código; o cadastro direto tem testes próprios
     }
 )
 
