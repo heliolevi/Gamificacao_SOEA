@@ -40,6 +40,7 @@ from security import (
     criar_access_token,
     criar_desafio,
     decodificar_token,
+    codigo_estavel,
     gerar_otp,
     gerar_refresh_token,
     hash_otp,
@@ -374,11 +375,12 @@ def registro_iniciar(dados: RegistroIn, request: Request):
     if _buscar_por_email(dados.email, "id_user"):
         _enviar(email_provider.enviar_aviso_conta_existente, dados.email)
     else:
-        codigo = gerar_otp()
+        attempt_id = str(uuid.uuid4())
+        codigo = codigo_estavel(f"cadastro:{dados.email}:{attempt_id}")
         banco_dados.table("pending_registrations").upsert(
             {
                 "email": dados.email,
-                "attempt_id": str(uuid.uuid4()),
+                "attempt_id": attempt_id,
                 "payload": {
                     "nome": dados.nome,
                     "vinculo": dados.vinculo,
@@ -387,7 +389,7 @@ def registro_iniciar(dados: RegistroIn, request: Request):
                 },
                 "otp_hash": hash_otp(codigo, f"cadastro:{dados.email}"),
                 "attempts": 0,
-                "expires_at": _agora_iso(config.OTP_TTL),
+                "expires_at": _agora_iso(config.OTP_TTL_CADASTRO),
                 "created_at": _agora_iso(),
             },
             on_conflict="email",
@@ -395,7 +397,7 @@ def registro_iniciar(dados: RegistroIn, request: Request):
         _enviar(email_provider.enviar_codigo, dados.email, codigo, "cadastro")
 
     igualar_tempo(inicio)
-    return CodigoEnviadoOut(mensagem=MSG_GENERICA_CADASTRO)
+    return CodigoEnviadoOut(mensagem=MSG_GENERICA_CADASTRO, expira_em=config.OTP_TTL_CADASTRO)
 
 
 @router.post("/registro/reenviar", response_model=CodigoEnviadoOut, status_code=202)
@@ -406,24 +408,25 @@ def registro_reenviar(dados: EmailIn, request: Request):
 
     pendente = (
         banco_dados.table("pending_registrations")
-        .select("email, expires_at")
+        .select("email, attempt_id")
         .eq("email", dados.email)
         .limit(1)
         .execute()
     )
     if pendente.data:
-        codigo = gerar_otp()
+        # Reenvia o MESMO código da tentativa (não troca): o e-mail anterior, se chegar atrasado, continua válido.
+        # As tentativas erradas NÃO zeram: reenviar não dá chances novas de adivinhar o mesmo código.
+        codigo = codigo_estavel(f"cadastro:{dados.email}:{pendente.data[0]['attempt_id']}")
         banco_dados.table("pending_registrations").update(
             {
                 "otp_hash": hash_otp(codigo, f"cadastro:{dados.email}"),
-                "attempts": 0,
-                "expires_at": _agora_iso(config.OTP_TTL),
+                "expires_at": _agora_iso(config.OTP_TTL_CADASTRO),
             }
         ).eq("email", dados.email).execute()
         _enviar(email_provider.enviar_codigo, dados.email, codigo, "cadastro")
 
     igualar_tempo(inicio)
-    return CodigoEnviadoOut(mensagem=MSG_GENERICA_CADASTRO)
+    return CodigoEnviadoOut(mensagem=MSG_GENERICA_CADASTRO, expira_em=config.OTP_TTL_CADASTRO)
 
 
 @router.post("/registro/verificar", response_model=SessaoOut)
